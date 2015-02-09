@@ -144,6 +144,7 @@ class Export(models.Model):
     user = models.ForeignKey('users.User')
     matches = models.ManyToManyField(Match, through='ExportMatch')
     start = models.DateTimeField(null=True, blank=True)
+    finish = models.DateTimeField(null=True, blank=True)
 
 
 class ExportMatch(models.Model):

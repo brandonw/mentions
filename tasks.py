@@ -65,9 +65,14 @@ def export_matches(export_id):
     if export.start:
         # exit early if this export has already begun elsewhere
         return
+    export.start = timezone.now()
+    export.save()
 
     for match in export.matches.all():
         # add row to csv
         pass
 
     # send e-mail
+
+    export.finish = timezone.now()
+    export.save()

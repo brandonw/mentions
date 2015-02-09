@@ -105,21 +105,21 @@ class SearchKeyword(models.Model):
 # BEGIN RUN MODELS #
 class SearchRun(models.Model):
     search = models.ForeignKey(Search)
-    start_time = models.DateTimeField(null=True, blank=True)
-    finish_time = models.DateTimeField(null=True, blank=True)
+    start = models.DateTimeField(null=True, blank=True)
+    finish = models.DateTimeField(null=True, blank=True)
 
     def __unicode__(self):
-        return '{} @ {}'.format(self.search.name, self.start_time)
+        return '{} @ {}'.format(self.search.name, self.start)
 
 
 class SiteRun(models.Model):
     search_run = models.ForeignKey(SearchRun)
     site = models.ForeignKey(Site)
-    start_time = models.DateTimeField()
-    finish_time = models.DateTimeField(null=True, blank=True)
+    start = models.DateTimeField()
+    finish = models.DateTimeField(null=True, blank=True)
 
     def __unicode__(self):
-        return '{} @ {}'.format(self.site.name, self.start_time)
+        return '{} @ {}'.format(self.site.name, self.start)
 
 
 class Match(models.Model):

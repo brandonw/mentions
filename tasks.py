@@ -10,14 +10,14 @@ def create_searchrun(search_id):
 
 def search(searchrun_id):
     search_run = Search.objects.get(id=searchrun_id)
-    if search_run.start_time:
+    if search_run.start:
         # make search task idempotent by checking if it has been started
         # elsewhere exiting early if so
         return
 
-    search_run.start_time = timezone.now()
+    search_run.start = timezone.now()
     if not search_run.search.is_enabled:
-        search_run.end_time = timezone.now()
+        search_run.end = timezone.now()
     search_run.save()
     if not search_run.search.is_enabled:
         # exit early if search is disabled
@@ -32,7 +32,7 @@ def search(searchrun_id):
 
     for site in sites.all():
         site_run = SiteRun.objects.create(
-            start_time=timezone.now(), site=site,
+            start=timezone.now(), site=site,
             search_run=search_run)
 
         matches = []

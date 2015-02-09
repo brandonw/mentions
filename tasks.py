@@ -1,5 +1,5 @@
 from django.utils import timezone
-from models import Search, SearchRun, SiteRun, Match
+from models import Search, SearchRun, SiteRun, Match, Export
 
 
 def create_searchrun(search_id):
@@ -52,18 +52,21 @@ def search(searchrun_id):
 
         # add matches all at once to reduce db load
         site_run.match_set.add(*matches)
-        site_run.finish_time = timezone.now()
+        site_run.finish = timezone.now()
         site_run.save()
         search_run.siterun_set.add(site_run)
 
-    search_run.finish_time = timezone.now()
+    search_run.finish = timezone.now()
     search_run.save()
 
 
-def export_matches(match_ids, email, attachment_base_name):
-    matches = Match.objects \
-        .filter(id__in=match_ids)
-    for match in matches.all():
+def export_matches(export_id):
+    export = Export.objects.get(id=export_id)
+    if export.start:
+        # exit early if this export has already begun elsewhere
+        return
+
+    for match in export.matches.all():
         # add row to csv
         pass
 

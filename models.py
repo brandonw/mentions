@@ -136,3 +136,18 @@ class Match(models.Model):
         return '{} matched "{}"'.format(
             self.site_run.search_run.search.name, self.found_keyword)
 # END RUN MODELS #
+
+
+# BEGIN EXPORT MODELS #
+
+class Export(models.Model):
+    user = models.ForeignKey('users.User')
+    matches = models.ManyToManyField(Match, through='ExportMatch')
+    start = models.DateTimeField(null=True, blank=True)
+
+
+class ExportMatch(models.Model):
+    match = models.ForeignKey(Match)
+    export = models.ForeignKey(Export)
+
+# END EXPORT MODELS

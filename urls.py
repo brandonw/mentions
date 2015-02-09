@@ -102,16 +102,12 @@ urlpatterns = patterns(
 
     # * Manually triggers the search task on a higher priority queue, to
     #   account with the speed implied in manually running a search.
-    # * Redirects back to the search details page, with a message displaying
-    # the search was successfully queued.
     url(r'^search/(?P<pk>\d+)/execute/$',
         views.trigger_search,
         name='search-trigger'
         ),
 
     # * Triggers the export task on the POSTed list of match IDs.
-    # * Redirects back to the matches page, with a message displaying the
-    #   export was successfully queued.
     url(r'^matches/export/$',
         views.trigger_export,
         name='export-trigger'

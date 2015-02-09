@@ -105,11 +105,7 @@ class SearchKeyword(models.Model):
 # BEGIN RUN MODELS #
 class SearchRun(models.Model):
     search = models.ForeignKey(Search)
-    start_time = models.DateTimeField()
-
-    # if this field is not important, it could be removed. this would also
-    # increase db efficiency due to not needing to perform an update
-    # transaction to save the finish_time for each run
+    start_time = models.DateTimeField(null=True, blank=True)
     finish_time = models.DateTimeField(null=True, blank=True)
 
     def __unicode__(self):
@@ -120,10 +116,6 @@ class SiteRun(models.Model):
     search_run = models.ForeignKey(SearchRun)
     site = models.ForeignKey(Site)
     start_time = models.DateTimeField()
-
-    # if this field is not important, it could be removed. this would also
-    # increase db efficiency due to not needing to perform an update
-    # transaction to save the finish_time for each run
     finish_time = models.DateTimeField(null=True, blank=True)
 
     def __unicode__(self):

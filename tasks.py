@@ -1,27 +1,38 @@
 from django.utils import timezone
-from models import SearchSite, SearchRun, SiteRun, Match
+from models import Search, SearchRun, SiteRun, Match
 
 
-# This task assumes it has been triggered by an authorized user.
-def search(search_id):
-    search_sites_query = SearchSite.objects \
-        .filter(search__id=search_id) \
-        .filter(search__is_enabled=True) \
-        .filter(site__is_enabled=True) \
-        .select_related('search', 'site')
+def create_searchrun(search_id):
+    search_run = SearchRun.objects.create(search_id=search_id)
+    # exec search(search_run.id) as async subtask
+    # note that the scheduling of a new search is not idempotent
 
-    if not search_sites_query.exists():
+
+def search(searchrun_id):
+    search_run = Search.objects.get(id=searchrun_id)
+    if search_run.start_time:
+        # make search task idempotent by checking if it has been started
+        # elsewhere exiting early if so
         return
 
-    search_sites = [search_site for search_site in search_sites_query.all()]
-    search_run = SearchRun.objects.create(
-        search=search_sites[0].search, start_time=timezone.now())
-    keywords = [kw for kw in
-                search_site.search.keywords.filter(is_enabled=True).all()]
+    search_run.start_time = timezone.now()
+    if not search_run.search.is_enabled:
+        search_run.end_time = timezone.now()
+    search_run.save()
+    if not search_run.search.is_enabled:
+        # exit early if search is disabled
+        return
 
-    for search_site in search_sites:
+    sites = search_run.search.sites.filter(is_enabled=True)
+
+    if not sites.exists():
+        return
+
+    keywords = [kw for kw in search.keywords.filter(is_enabled=True).all()]
+
+    for site in sites.all():
         site_run = SiteRun.objects.create(
-            start_time=timezone.now(), site=search_site.site,
+            start_time=timezone.now(), site=site,
             search_run=search_run)
 
         matches = []
@@ -34,7 +45,7 @@ def search(search_id):
 
         # dummy match
         matches.append(Match(
-            title='test match', url=search_site.site.url,
+            title='test match', url=site.url,
             src_keyword=keywords[0], found_keyword=kw.keyword + '1',
             site_run=site_run))
         # end dummy match
@@ -49,7 +60,6 @@ def search(search_id):
     search_run.save()
 
 
-# This task assumes it has been triggered by an authorized user.
 def export_matches(match_ids, email, attachment_base_name):
     matches = Match.objects \
         .filter(id__in=match_ids)
